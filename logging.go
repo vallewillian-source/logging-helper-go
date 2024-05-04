@@ -2,9 +2,9 @@ package logging
 
 import "fmt"
 
-func Init(podName string, podNamespace string, logLevel string, serviceName string, backend string) error {
+func Init(podName string, podNamespace string, logLevel string, serviceName string, version string, backend string) error {
 	if backend == "zerolog" {
-		initZerolog(podName, podNamespace, logLevel, serviceName)
+		initZerolog(podName, podNamespace, logLevel, serviceName, version)
 	} else {
 		fmt.Println("Invalid backend")
 		return fmt.Errorf("Invalid backend")

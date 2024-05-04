@@ -8,18 +8,18 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var version = "1.1"
-
+var version = ""
 var podName string = ""
 var podNamespace string = ""
 var serviceName string = ""
 var logLevel string = ""
 
-func initZerolog(InputPodName string, InputPodNamespace string, logLevelInput string, serviceNameInput string) {
+func initZerolog(InputPodName string, InputPodNamespace string, logLevelInput string, serviceNameInput string, versionInput string) {
 	podName = InputPodName
 	podNamespace = InputPodNamespace
 	serviceName = serviceNameInput
 	logLevel = logLevelInput
+	version = versionInput
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
