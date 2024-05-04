@@ -10,12 +10,18 @@ import (
 
 var version = "1.1"
 
-var podName = os.Getenv("MY_POD_NAME")
-var podNamespace = os.Getenv("MY_POD_NAMESPACE")
+var podName string = ""
+var podNamespace string = ""
+var serviceName string = ""
+var logLevel string = ""
 
-func initZerolog() {
+func initZerolog(InputPodName string, InputPodNamespace string, logLevelInput string, serviceNameInput string) {
+	podName = InputPodName
+	podNamespace = InputPodNamespace
+	serviceName = serviceNameInput
+	logLevel = logLevelInput
+
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	logLevel := os.Getenv("LOG_LEVEL")
 
 	if logLevel == "" {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
@@ -44,7 +50,7 @@ func initZerolog() {
 func errorZeroLog(err error, msg string, extra interface{}) {
 	log.Error().
 		CallerSkipFrame(2).
-		Str("serviceContext.service", "warehouse-ms-go").
+		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
 		AnErr("context.reportLocation", err).
 		Str("cloudContext.podName", podName).
@@ -56,7 +62,7 @@ func errorZeroLog(err error, msg string, extra interface{}) {
 func fatalZeroLog(err error, msg string, extra interface{}) {
 	log.Fatal().
 		CallerSkipFrame(2).
-		Str("serviceContext.service", "warehouse-ms-go").
+		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
 		AnErr("context.reportLocation", err).
 		Str("cloudContext.podName", podName).
@@ -68,7 +74,7 @@ func fatalZeroLog(err error, msg string, extra interface{}) {
 func warnZeroLog(msg string, extra interface{}) {
 	log.Warn().
 		CallerSkipFrame(2).
-		Str("serviceContext.service", "warehouse-ms-go").
+		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
 		Str("cloudContext.podName", podName).
 		Str("cloudContext.podNamespace", podNamespace).
@@ -79,7 +85,7 @@ func warnZeroLog(msg string, extra interface{}) {
 func infoZeroLog(msg string, extra interface{}) {
 	log.Info().
 		CallerSkipFrame(2).
-		Str("serviceContext.service", "warehouse-ms-go").
+		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
 		Str("cloudContext.podName", podName).
 		Str("cloudContext.podNamespace", podNamespace).
@@ -90,7 +96,7 @@ func infoZeroLog(msg string, extra interface{}) {
 func debugZeroLog(msg string, extra interface{}) {
 	log.Debug().
 		CallerSkipFrame(2).
-		Str("serviceContext.service", "warehouse-ms-go").
+		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
 		Str("cloudContext.podName", podName).
 		Str("cloudContext.podNamespace", podNamespace).
@@ -101,7 +107,7 @@ func debugZeroLog(msg string, extra interface{}) {
 func traceZeroLog(msg string, extra interface{}) {
 	log.Trace().
 		CallerSkipFrame(2).
-		Str("serviceContext.service", "warehouse-ms-go").
+		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
 		Str("cloudContext.podName", podName).
 		Str("cloudContext.podNamespace", podNamespace).

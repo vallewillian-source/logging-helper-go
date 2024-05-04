@@ -1,4 +1,4 @@
-module logging
+module github.com/vallewillian-source/logging-helper-go
 
 go 1.22.2
 
