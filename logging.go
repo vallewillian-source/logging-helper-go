@@ -37,8 +37,3 @@ func Info(msg string, extra interface{}) {
 func Debug(msg string, extra interface{}) {
 	debugZeroLog(msg, extra)
 }
-
-// Trace logs a message with severity "TRACE"
-func Trace(msg string, extra interface{}) {
-	traceZeroLog(msg, extra)
-}

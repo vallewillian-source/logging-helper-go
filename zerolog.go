@@ -5,14 +5,17 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
-var version = ""
-var podName string = ""
-var podNamespace string = ""
-var serviceName string = ""
-var logLevel string = ""
+var (
+	version      = ""
+	podName      = ""
+	podNamespace = ""
+	serviceName  = ""
+	logLevel     = ""
+	stderrLogger zerolog.Logger
+	stdoutLogger zerolog.Logger
+)
 
 func initZerolog(InputPodName string, InputPodNamespace string, logLevelInput string, serviceNameInput string, versionInput string) {
 	podName = InputPodName
@@ -23,32 +26,39 @@ func initZerolog(InputPodName string, InputPodNamespace string, logLevelInput st
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
-	if logLevel == "" {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	} else {
+	level := zerolog.InfoLevel // Default to Info level
+	if logLevel != "" {
 		switch logLevel {
 		case "Trace":
-			zerolog.SetGlobalLevel(zerolog.TraceLevel)
+			level = zerolog.TraceLevel
 		case "Debug":
-			zerolog.SetGlobalLevel(zerolog.DebugLevel)
+			level = zerolog.DebugLevel
 		case "Info":
-			zerolog.SetGlobalLevel(zerolog.InfoLevel)
+			level = zerolog.InfoLevel
 		case "Warn":
-			zerolog.SetGlobalLevel(zerolog.WarnLevel)
+			level = zerolog.WarnLevel
 		case "Error":
-			zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+			level = zerolog.ErrorLevel
 		case "Fatal":
-			zerolog.SetGlobalLevel(zerolog.FatalLevel)
-		default:
-			zerolog.SetGlobalLevel(zerolog.InfoLevel)
+			level = zerolog.FatalLevel
 		}
 	}
+	zerolog.SetGlobalLevel(level)
 
-	log.Logger = log.With().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
+	stderrLogger = zerolog.New(os.Stderr).With().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
+	stdoutLogger = zerolog.New(os.Stdout).With().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339})
+}
+
+func getLoggerForLevel(level zerolog.Level) zerolog.Logger {
+	if level == zerolog.ErrorLevel || level == zerolog.FatalLevel {
+		return stderrLogger
+	}
+	return stdoutLogger
 }
 
 func errorZeroLog(err error, msg string, extra interface{}) {
-	log.Error().
+	logger := getLoggerForLevel(zerolog.ErrorLevel)
+	logger.Error().
 		CallerSkipFrame(2).
 		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
@@ -60,7 +70,8 @@ func errorZeroLog(err error, msg string, extra interface{}) {
 }
 
 func fatalZeroLog(err error, msg string, extra interface{}) {
-	log.Fatal().
+	logger := getLoggerForLevel(zerolog.FatalLevel)
+	logger.Fatal().
 		CallerSkipFrame(2).
 		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
@@ -72,7 +83,8 @@ func fatalZeroLog(err error, msg string, extra interface{}) {
 }
 
 func warnZeroLog(msg string, extra interface{}) {
-	log.Warn().
+	logger := getLoggerForLevel(zerolog.WarnLevel)
+	logger.Warn().
 		CallerSkipFrame(2).
 		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
@@ -83,7 +95,8 @@ func warnZeroLog(msg string, extra interface{}) {
 }
 
 func infoZeroLog(msg string, extra interface{}) {
-	log.Info().
+	logger := getLoggerForLevel(zerolog.InfoLevel)
+	logger.Info().
 		CallerSkipFrame(2).
 		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
@@ -94,18 +107,8 @@ func infoZeroLog(msg string, extra interface{}) {
 }
 
 func debugZeroLog(msg string, extra interface{}) {
-	log.Debug().
-		CallerSkipFrame(2).
-		Str("serviceContext.service", serviceName).
-		Str("serviceContext.version", version).
-		Str("cloudContext.podName", podName).
-		Str("cloudContext.podNamespace", podNamespace).
-		Interface("extra", extra).
-		Msg(msg)
-}
-
-func traceZeroLog(msg string, extra interface{}) {
-	log.Trace().
+	logger := getLoggerForLevel(zerolog.DebugLevel)
+	logger.Debug().
 		CallerSkipFrame(2).
 		Str("serviceContext.service", serviceName).
 		Str("serviceContext.version", version).
