@@ -37,3 +37,27 @@ func Info(msg string, extra interface{}) {
 func Debug(msg string, extra interface{}) {
 	debugZeroLog(msg, extra)
 }
+
+/* Whatsmeow Integration */
+type CustomLogger struct {
+}
+
+func NewCustomLogger() *CustomLogger {
+	return &CustomLogger{}
+}
+
+func (l *CustomLogger) Debugf(format string, v ...interface{}) {
+	debugZeroLog(fmt.Sprintf(format, v...), nil)
+}
+
+func (l *CustomLogger) Infof(format string, v ...interface{}) {
+	infoZeroLog(fmt.Sprintf(format, v...), nil)
+}
+
+func (l *CustomLogger) Warnf(format string, v ...interface{}) {
+	warnZeroLog(fmt.Sprintf(format, v...), nil)
+}
+
+func (l *CustomLogger) Errorf(format string, v ...interface{}) {
+	errorZeroLog(nil, fmt.Sprintf(format, v...), nil)
+}
